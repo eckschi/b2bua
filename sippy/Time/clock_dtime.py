@@ -78,7 +78,7 @@ def find_symbol(symname, lnames, paths):
             continue
     raise Exception('Bah, %s cannot be found in libs %s in the paths %s' % (symname, lnames, paths))
 
-clock_gettime = find_symbol('clock_gettime', ('c', 'rt'), ('/usr/lib', '/lib'))
+clock_gettime = find_symbol('clock_gettime', ('c', 'rt', 'c.musl-x86_64'), ('/usr/lib', '/lib'))
 for tstype in timespec64, timespec32:
     clock_gettime.argtypes = [ctypes.c_int, ctypes.POINTER(tstype)]
     t = tstype()
