@@ -33,18 +33,16 @@ from sippy.Core.EventDispatcher import ED2
 from sippy.Time.MonoTime import MonoTime
 
 def Timeout(timeout_cb, ival, nticks = 1, *cb_params):
-    el = ED2.regTimer(timeout_cb, ival, nticks, False, *cb_params)
-    el.go()
+    el = ED2.regTimer(timeout_cb, ival, nticks, False, *cb_params) # TODO: why unpack here?
     return el
 
-def TimeoutInact(timeout_cb, ival, nticks = 1, *cb_params):
-    return ED2.regTimer(timeout_cb, ival, nticks, False, *cb_params)
+# def TimeoutInact(timeout_cb, ival, nticks = 1, *cb_params):
+#     return ED2.regTimer(timeout_cb, ival, nticks, False, *cb_params)
 
 def TimeoutAbsMono(timeout_cb, mtime, *cb_params):
     if not isinstance(mtime, MonoTime):
         raise TypeError('mtime is not MonoTime')
     el = ED2.regTimer(timeout_cb, mtime, None, True, *cb_params)
-    el.go()
     return el
 
 def testTimeout():

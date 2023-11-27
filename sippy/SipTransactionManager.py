@@ -505,6 +505,9 @@ class SipTransactionManager(object):
 
     def timerA(self, t):
         #print 'timerA', t
+        if t.userv is None:
+            print('userv is none')
+            return 
         self.transmitData(t.userv, t.data, t.address)
         t.tout *= 2
         t.teA = Timeout(self.timerA, t.tout, 1, t)
