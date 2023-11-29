@@ -25,7 +25,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from threading import Lock
+from random import random
 import asyncio
+from sippy.Time.MonoTime import MonoTime
 
 
 async def TimeoutTask(timeout_cb, ival, cb_params):
@@ -33,8 +35,15 @@ async def TimeoutTask(timeout_cb, ival, cb_params):
     timeout_cb(*cb_params)
 
 
-async def ImmediateTask(timeout_cb, cb_params):
-    timeout_cb(*cb_params)
+async def ImmediateTask(task_cb, cb_params):
+    task_cb(*cb_params)
+
+
+async def PeriodicTask(task_cb, ival, cb_params):
+    while True:
+        await asyncio.sleep(ival)
+        task_cb(*cb_params)
+
 
 class Singleton(object):
     '''Use to create a singleton'''
@@ -63,8 +72,12 @@ class Singleton(object):
 class EventDispatcher2(Singleton):
     loop = None
 
+    def get_randomizer(self, p):
+        return lambda x: x * (1.0 + p * (1.0 - 2.0 * random()))
+
     def __init__(self, freq=100.0):
         self.evloop = asyncio.new_event_loop()
+        self.randomizer = self.get_randomizer(0.1)
 
     def loop(self, timeout=None, freq=None):
         self.evloop.run_forever()
@@ -72,8 +85,19 @@ class EventDispatcher2(Singleton):
     def breakLoop(self, rval=0):
         self.evloop.stop()
 
-    def regTimer(self, timeout_cb, ival, nticks=1, abs_time=False, *cb_params):
-        self.evloop.create_task(TimeoutTask(timeout_cb, ival, cb_params))
+    def regTimer(self, timer_cb, ival, nticks=1, abs_time=False, *cb_params) -> asyncio.Task:
+        diff = 0
+        if abs_time:
+            if not isinstance(ival, MonoTime):
+                raise TypeError('ival is not MonoTime')
+            diff = ival.offsetFromNow()  # ival - MonoTime()
+        else:
+            diff = self.randomizer(ival)
+
+        if nticks == -1:
+            return self.evloop.create_task(PeriodicTask(timer_cb, diff, cb_params))
+        else:
+            return self.evloop.create_task(TimeoutTask(timer_cb, diff, cb_params))
 
     def callFromThread(self, thread_cb, *cb_params):
         self.evloop.create_task(ImmediateTask(thread_cb, cb_params))
