@@ -60,12 +60,12 @@ class AsyncSender(Thread):
             while len(self.userv.wi) == 0:
                 self.userv.wi_available.wait()
             wi = self.userv.wi.pop(0)
-            if wi == None:
+            if wi is None:
                 # Shutdown request, relay it further
                 self.userv.wi.append(None)
                 self.userv.wi_available.notify()
             self.userv.wi_available.release()
-            if wi == None:
+            if wi is None:
                 break
             data, address = wi
             try:

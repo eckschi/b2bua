@@ -36,6 +36,7 @@ async def TimeoutTask(timeout_cb, ival, cb_params):
 
 
 async def ImmediateTask(task_cb, cb_params):
+    await asyncio.sleep(0)
     task_cb(*cb_params)
 
 
