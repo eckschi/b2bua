@@ -34,7 +34,7 @@ from sippy.SipAddress import SipAddress
 from sippy.SipRoute import SipRoute
 from sippy.Exceptions.SipParseError import SipParseError, SdpParseError
 from sippy.Exceptions.RtpProxyError import RtpProxyError
-from sippy.Udp_server import Udp_server, Udp_server_opts
+from sippy.async_udp_server import Udp_server, Udp_server_opts
 from datetime import datetime
 from hashlib import md5
 from functools import reduce
@@ -134,38 +134,41 @@ class local4remote(object):
         self.cache_r2l_old = {}
         self.cache_l2s = {}
         self.handleIncoming = handleIncoming
-        try:
-            # Python can be compiled with IPv6 support, but if kernel
-            # has not we would get exception creating the socket.
-            # Workaround that by trying create socket and checking if
-            # we get an exception.
-            socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
-        except OSError:
-            socket.has_ipv6 = False
-        if 'my' in dir(global_config['_sip_address']):
-            if socket.has_ipv6:
-                laddresses = (('0.0.0.0', global_config['_sip_port']), ('[::]', global_config['_sip_port']))
-            else:
-                laddresses = (('0.0.0.0', global_config['_sip_port']),)
-        else:
-            laddresses = ((global_config['_sip_address'], global_config['_sip_port']),)
-            self.fixed = True
+        # try:
+        #     # Python can be compiled with IPv6 support, but if kernel
+        #     # has not we would get exception creating the socket.
+        #     # Workaround that by trying create socket and checking if
+        #     # we get an exception.
+        #     socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+        # except OSError:
+        #     socket.has_ipv6 = False
+        # if 'my' in dir(global_config['_sip_address']):
+        #     if socket.has_ipv6:
+        #         laddresses = (('0.0.0.0', global_config['_sip_port']), ('[::]', global_config['_sip_port']))
+        #     else:
+        #         laddresses = (('0.0.0.0', global_config['_sip_port']),)
+        # else:
+        #     laddresses = ((global_config['_sip_address'], global_config['_sip_port']),)
+        #     self.fixed = True
         # Since we are (an)using SO_REUSEXXX do a quick dry run to make
         # sure no existing app is running on the same port.
-        for dryr in (True, False):
-            for laddress in laddresses:
-                self.initServer(laddress, dryr)
+        # for dryr in (True, False):
+        #     for laddress in laddresses:
+        #         self.initServer(laddress, dryr)
+
+        self.initServer(global_config['nh_addr'])
 
     def initServer(self, laddress, dryr=False):
         sopts = self.Udp_server_opts(laddress, self.handleIncoming)
         sopts.ploss_out_rate = self.ploss_out_rate
         sopts.pdelay_out_max = self.pdelay_out_max
-        if dryr:
-            sopts.flags = 0
+        # if dryr:
+        #    sopts.flags = 0
         server = self.udp_server_class(self.global_config, sopts)
-        if dryr:
-            server.shutdown()
-            return None
+        # if dryr:
+        #     server.shutdown()
+        #     return None
+        server.start_server()
         self.cache_l2s[laddress] = server
         return server
 
@@ -252,7 +255,7 @@ class SipTransactionManager(object):
         self.l1rcache = {}
         self.l2rcache = {}
         self.req_consumers = {}
-        Timeout(self.rCachePurge, 32, -1)
+        Timeout(self.rCachePurge, 32, -1) # do happerts
 
     def handleIncoming(self, data_in, address, server, rtime):
         if len(data_in) < 32:

@@ -78,6 +78,7 @@ class EventDispatcher2(Singleton):
 
     def __init__(self, freq=100.0):
         self.evloop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.evloop)
         self.randomizer = self.get_randomizer(0.1)
 
     def loop(self, timeout=None, freq=None):

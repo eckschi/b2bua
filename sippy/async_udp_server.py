@@ -52,11 +52,10 @@ class Udp_server(object):
 
         self.transport, self.protocol = await loop.create_datagram_endpoint(
             lambda: EchoServerProtocol(self.handle_datagram),
-            local_addr=self.uopts.laddress)  # (self.host, self.port))
+            local_addr=self.uopts.laddress)
 
         print(f"UDP server started on {
               self.transport.get_extra_info('sockname')}")
-        print(self.transport)
 
     def start_server(self):
         event_loop = asyncio.get_event_loop()
