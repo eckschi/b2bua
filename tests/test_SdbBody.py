@@ -10,22 +10,22 @@ class TestSdpBodyFunctions(unittest.TestCase):
     def test_localStr(self):
         got = SdpBody(sdp_multi_stream).localStr('1.2.3.4', 12345)
         want = sdp_multi_stream.replace('\n','\r\n')
-        self.assertEquals(want, got)
+        self.assertEqual(want, got)
 
     def test_str_override_multiple_stremas(self):
         got = SdpBody(sdp_multi_stream)
         want = sdp_multi_stream.replace('\n','\r\n')
-        self.assertEquals(want, str(got))
+        self.assertEqual(want, str(got))
 
     def test_str_override_h323_sdp(self):
         got = SdpBody(sdp_h323)
         want = sdp_h323.replace('\n','\r\n')
-        self.assertEquals(want, str(got))
+        self.assertEqual(want, str(got))
 
     def test_str_override_single_audio(self):
         got = SdpBody(sdp_single_audio)
         want = sdp_single_audio.replace('\n','\r\n')
-        self.assertEquals(want, str(got))
+        self.assertEqual(want, str(got))
 
 if __name__ == '__main__':
     unittest.main()

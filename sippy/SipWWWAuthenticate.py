@@ -54,15 +54,15 @@ class SipWWWAuthenticate(SipGenericHF):
       algorithm = None):
         self.otherparams = []
         SipGenericHF.__init__(self, body)
-        if body != None:
+        if body is not None:
             return
         self.parsed = True
-        if algorithm != None:
+        if algorithm is not None:
             self.algorithm = algorithm
             self.qop = ('auth',)
-        if nonce == None:
+        if nonce is None:
             nonce = self.ho.emit_challenge(NameList2AlgMask((self.algorithm,)))
-        if realm == None:
+        if realm is None:
             realm = SipConf.my_address
         self.realm = realm
         self.nonce = nonce
@@ -98,10 +98,10 @@ class SipWWWAuthenticate(SipGenericHF):
     def localStr(self, local_addr = None, local_port = None):
         if not self.parsed:
             return self.body
-        if local_addr == None or 'my' not in dir(self.realm):
+        if local_addr is None or 'my' not in dir(self.realm):
             local_addr = self.realm
         rval = 'Digest realm="%s",nonce="%s"' % (local_addr, self.nonce)
-        if self.qop != None:
+        if self.qop is not None:
             sqop = self.qop[0]
             for qop in self.qop[1:]:
                 sqop += ',%s' % qop
@@ -109,9 +109,9 @@ class SipWWWAuthenticate(SipGenericHF):
                 rval += ',qop="%s"' % (sqop,)
             else:
                 rval += ',qop=%s' % (sqop,)
-        if self.algorithm != None:
+        if self.algorithm is not None:
             rval += ',algorithm=%s' % (self.algorithm,)
-        if self.opaque != None:
+        if self.opaque is not None:
             rval += ',opaque="%s"' % (self.opaque,)
         for param in self.otherparams:
             rval += ',%s="%s"' % param
@@ -144,7 +144,7 @@ class SipWWWAuthenticate(SipGenericHF):
             auth.qop = qop
             auth.nc = '00000001'
             auth.cnonce = self.readhex(4)
-        if self.opaque != None:
+        if self.opaque is not None:
             auth.otherparams.append(('opaque', f'"{self.opaque}"'))
         auth.genAuthResponse(password, method, body)
         return auth

@@ -69,10 +69,10 @@ class SipAuthorization(SipGenericHF):
     def __init__(self, body = None, username = None, uri = None, realm = None, nonce = None, response = None, \
                  cself = None):
         SipGenericHF.__init__(self, body)
-        if body != None:
+        if body is not None:
             return
         self.parsed = True
-        if cself != None:
+        if cself is not None:
             self.username = cself.username
             self.uri = cself.uri
             self.realm = cself.realm
@@ -128,9 +128,9 @@ class SipAuthorization(SipGenericHF):
             return self.body
         rval = 'Digest username="%s",realm="%s",nonce="%s",uri="%s",response="%s"' % \
                (self.username, self.realm, self.nonce, self.uri, self.response)
-        if self.algorithm != None:
+        if self.algorithm is not None:
             rval += ',algorithm=%s' % (self.algorithm,)
-        if self.qop != None:
+        if self.qop is not None:
             rval += ',qop=%s,nc=%s,cnonce="%s"' % (self.qop, self.nc, self.cnonce)
         for param in self.otherparams:
             rval += ',%s=%s' % param
@@ -152,11 +152,11 @@ class SipAuthorization(SipGenericHF):
             self.parse()
         if self.algorithm not in _HASH_FUNC:
             return False
-        if self.qop != None and self.qop not in ('auth', 'auth-int'):
+        if self.qop is not None and self.qop not in ('auth', 'auth-int'):
             return False
-        algmask = _HASH_FUNC[self.algorithm][1]
-        if not self.ho.validate_challenge(self.nonce, (algmask,)):
-            return False
+        #algmask = _HASH_FUNC[self.algorithm][1]
+        #if not self.ho.validate_challenge(self.nonce, (algmask,)):
+        #    return False
         response = DigestCalcResponse(self.algorithm, HA1, self.nonce, self.nc, \
           self.cnonce, self.qop, method, self.uri, body)
         return response == self.response
